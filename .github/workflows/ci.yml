@@ -14,5 +14,7 @@ jobs:
       - run: docker build -t pdm-api .
       - run: |
           docker run -d -p 8000:8000 --name pdm pdm-api
-          sleep 8
+          for i in $(seq 1 20); do curl -sf http://localhost:8000/health && break; sleep 2; done
+          docker ps
           curl --fail http://localhost:8000/health
+          python -c "import json,urllib.request as u; r=[{'volt':190,'rotate':420,'pressure':90,'vibration':60}]*24; d=json.dumps({'machine_model':'model3','age':12,'readings':r,'errors_last_24h':{'error1':3,'error3':2},'days_since_maintenance':{'comp1':150,'comp2':160,'comp3':140,'comp4':170}}).encode(); print(u.urlopen(u.Request('http://localhost:8000/predict',d,{'Content-Type':'application/json'})).read().decode())"
